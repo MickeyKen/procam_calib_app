@@ -84,7 +84,9 @@ class Test(QMainWindow):
             cv2.imwrite("data2/" + file_name + ".jpeg", img)
 
         if calib_flag == 1:
-            pass
+            ret2, circles = cv2.findCirclesGrid(img, (10,7), flags = cv2.CALIB_CB_SYMMETRIC_GRID)
+            if ret2 == True:
+                cv2.drawChessboardCorners(img, (10, 7), circles, ret2)
 
         show_img = cv2.resize(img,(480,270))
         self.drawing(show_img)

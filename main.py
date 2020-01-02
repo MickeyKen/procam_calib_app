@@ -72,25 +72,6 @@ def chessboard_pW():
 
     return pW
 
-def create_gray_img(in_img):
-    ###  for chessboard  ###
-    gray = cv.cvtColor(in_img, cv.COLOR_BGR2GRAY)
-
-    ###  for circle grid  ###
-    orgHeight, orgWidth = in_img.shape[:2]
-    for i in range(orgHeight):
-        for j in range(orgWidth):
-          b = in_img[i][j][0]
-          g = in_img[i][j][1]
-          r = in_img[i][j][2]
-          if b > 230 and g > 230 and r > 230:
-            in_img[i][j][0] = 0
-            in_img[i][j][1] = 0
-            in_img[i][j][2] = 0
-    gray_for_circle = cv.cvtColor(in_img, cv.COLOR_BGR2GRAY)
-
-    return gray, gray_for_circle
-
 
 ##########################################
 ### get circle 1920*1080 for projector ###
@@ -98,24 +79,106 @@ def create_gray_img(in_img):
 
 chessboard = cv.imread('circleboard10x5.png',1)
 
-ret_c, circles_c = cv.findCirclesGrid(chessboard, (args.width,args.height), flags = cv.CALIB_CB_SYMMETRIC_GRID)
+ret_circle, circles_circle = cv.findCirclesGrid(chessboard, (args.width,args.height), flags = cv.CALIB_CB_SYMMETRIC_GRID)
 
-if ret_c == True:
-  objpoints_c.append(objp)
-  imgpoints_c.append(circles_c)
-  cv.drawChessboardCorners(chessboard, (args.width, args.height), circles_c, ret_c)
+if ret_circle == True:
+  objpoints_circle.append(objp)
+  imgpoints_circle.append(circles_circle)
+  cv.drawChessboardCorners(chessboard, (args.width, args.height), circles_circle, ret_circle)
 
 #####################
 ### main function ###
 #####################
 img_num = 1
-images = glob.glob('*.jpeg')
+images = glob.glob('data/*.jpeg')
 
 for fname in images:
 
   img = cv.imread(fname)
+  # print fname
+  img2 = cv.imread("data2/" + fname.split('/')[1])
+  # print "data2/" + fname.split('/')[1]
+  # print "*** "
+
   copy_img = img.copy()
-  gray, gray_for_circle = create_gray_img(copy_img)
-  cv.imshow("circleboard", gray_for_circle)
+  copy_img2 = img2.copy()
+
+  gray = cv.cvtColor(copy_img, cv.COLOR_BGR2GRAY)
+  gray_for_circle = cv.cvtColor(copy_img2, cv.COLOR_BGR2GRAY)
+
+
+  ### Find the chess and circle board corners  ###
+  ret, corners = cv.findChessboardCorners(gray, (9,7), None)
+  ret2, circles = cv.findCirclesGrid(gray_for_circle, (10,7), flags = cv.CALIB_CB_SYMMETRIC_GRID)
+
+
+  if ret == True and ret2 == True:
+      ### main calibration ###
+      corners2 = cv.cornerSubPix(gray, corners, (9,9), (-1,-1), criteria)
+      cv.drawChessboardCorners(img, (9,7), corners2, ret)
+
+      pW = chessboard_pW()
+
+      ret, rvec, tvec = cv.solvePnP(pW, corners2, K, d)
+      rmat = cv.Rodrigues(rvec)[0]
+      #rmat [0][0] ~ [2][2]
+      rmat[0][2] = 0.020
+      rmat[1][2] = 0.200
+      rmat[2][2] = 0.956
+      #  rmat
+      ARt = np.dot(K, rmat)
+      ARt = np.linalg.inv(ARt)
+      # print H
+
+      copy_pW = pW.copy()
+
+      c = 0
+      for i in corners2:
+          keisan_mat = np.float32([[0.0,  0.0, 1.0]])
+          keisan_mat[0][0] = i[0][0]
+          keisan_mat[0][1] = i[0][1]
+          keisan_mat = keisan_mat.T
+          keisan_mat = np.dot(ARt, keisan_mat)
+          keisan_mat = keisan_mat / keisan_mat[2][0]
+          copy_pW[c][0] = keisan_mat[0][0]
+          copy_pW[c][1] = keisan_mat[1][0]
+          # print copy_pW
+          c += 1
+      # print copy_pW
+
+      h, status = cv.findHomography(copy_pW, corners2)
+      h = np.linalg.inv(h)
+      cv.drawChessboardCorners(img, (10, 7), circles, ret2)
+      proj_pW = np.zeros([7 * 10, 3], dtype=np.float32)
+
+      count = 0
+      for i in circles:
+        mat = np.float32([[0.0,  0.0, 1.0]])
+        mat[0][0] = i[0][0]
+        mat[0][1] = i[0][1]
+        mat = mat.T
+        mat = np.dot(h, mat)
+        mat = mat / mat[2][0]
+        proj_pW[count][0] = mat[0][0]
+        proj_pW[count][1] = mat[1][0]
+        # print count
+        count += 1
+      #print proj_pW
+      objectPoints.append(proj_pW)
+      projCirclePoints.append(circles_circle)
+  img_num += 1
+  cv.imshow('screen',img)
   cv.waitKey(0)
-  cv.destroyAllWindows()
+
+# print objectPoints
+# print projCirclePoints
+
+ret, K_proj, dist_coef_proj, rvecs, tvecs = cv.calibrateCamera(objectPoints,
+                                                                projCirclePoints,
+                                                               (proj_width, proj_height),
+                                                               None,
+                                                               None)
+                                                    # flags = cv.CALIB_USE_INTRINSIC_GUESS
+print("proj calib mat after\n%s"%K_proj)
+print("proj dist_coef %s"%dist_coef_proj.T)
+print("calibration reproj err %s"%ret)
