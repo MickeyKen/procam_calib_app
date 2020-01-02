@@ -77,13 +77,14 @@ def chessboard_pW():
 ### get circle 1920*1080 for projector ###
 #########################################
 
-chessboard = cv.imread('circleboard10x5.png',1)
+chessboard = cv.imread('board/circleboard10x7.png',1)
 
 ret_circle, circles_circle = cv.findCirclesGrid(chessboard, (args.width,args.height), flags = cv.CALIB_CB_SYMMETRIC_GRID)
 
 if ret_circle == True:
-  objpoints_circle.append(objp)
-  imgpoints_circle.append(circles_circle)
+  # print (circles_circle)
+  objpoints_c.append(objp)
+  imgpoints_c.append(circles_circle)
   cv.drawChessboardCorners(chessboard, (args.width, args.height), circles_circle, ret_circle)
 
 #####################
@@ -148,8 +149,8 @@ for fname in images:
 
       h, status = cv.findHomography(copy_pW, corners2)
       h = np.linalg.inv(h)
-      cv.drawChessboardCorners(img, (10, 7), circles, ret2)
-      proj_pW = np.zeros([7 * 10, 3], dtype=np.float32)
+      cv.drawChessboardCorners(img, (args.width, args.height), circles, ret2)
+      proj_pW = np.zeros([args.height * args.width, 3], dtype=np.float32)
 
       count = 0
       for i in circles:
@@ -170,12 +171,14 @@ for fname in images:
   cv.imshow('screen',img)
   cv.waitKey(0)
 
-# print objectPoints
-# print projCirclePoints
+# print (objectPoints)
+# print (projCirclePoints)
 
 ret, K_proj, dist_coef_proj, rvecs, tvecs = cv.calibrateCamera(objectPoints,
                                                                 projCirclePoints,
                                                                (proj_width, proj_height),
+                                                               None,
+                                                               None,
                                                                None,
                                                                None)
                                                     # flags = cv.CALIB_USE_INTRINSIC_GUESS

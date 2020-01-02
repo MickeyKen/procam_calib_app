@@ -30,12 +30,12 @@ def main():
         print circles[8][0]
         print circles[49][0]
         print circles[41][0]
-        
+
 
     cv2.imshow('img', chessboard)
     #cv2.imshow('inv_img',invgray)
     cv2.waitKey(0)
-    
+
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
