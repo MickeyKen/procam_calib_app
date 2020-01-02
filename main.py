@@ -49,9 +49,6 @@ objp[:,:2] = np.mgrid[0:args.width,0:args.height].T.reshape(-1,2)
 objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
 
-### for ordinal calibration ###
-objpoints_c = [] # 3d point in real world space
-imgpoints_c = [] # 2d points in image plane.
 
 ### for projector matrix ###
 objectPoints = []
@@ -76,16 +73,15 @@ def chessboard_pW():
 ##########################################
 ### get circle 1920*1080 for projector ###
 #########################################
+def get_circle_grid():
+    chessboard = cv.imread('board/circleboard10x7.png',1)
 
-chessboard = cv.imread('board/circleboard10x7.png',1)
+    ret_circle, circles_circle = cv.findCirclesGrid(chessboard, (args.width,args.height), flags = cv.CALIB_CB_SYMMETRIC_GRID)
 
-ret_circle, circles_circle = cv.findCirclesGrid(chessboard, (args.width,args.height), flags = cv.CALIB_CB_SYMMETRIC_GRID)
+    if ret_circle == True:
+      cv.drawChessboardCorners(chessboard, (args.width, args.height), circles_circle, ret_circle)
 
-if ret_circle == True:
-  # print (circles_circle)
-  objpoints_c.append(objp)
-  imgpoints_c.append(circles_circle)
-  cv.drawChessboardCorners(chessboard, (args.width, args.height), circles_circle, ret_circle)
+    return circles_circle
 
 #####################
 ### main function ###
@@ -165,8 +161,10 @@ for fname in images:
         # print count
         count += 1
       #print proj_pW
+      circles_circle = get_circle_grid()
       objectPoints.append(proj_pW)
       projCirclePoints.append(circles_circle)
+
   img_num += 1
   cv.imshow('screen',img)
   cv.waitKey(0)
