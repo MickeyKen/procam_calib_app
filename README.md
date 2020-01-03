@@ -10,3 +10,5 @@
 <div align="center">
 <img src="https://github.com/MickeyKen/procam_calib_app/blob/master/camera_imagedata_2.jpeg" width="200px" />
 </div>
+
+###### 3. サークルグリッドを`app_frame.py`を使い，検出用の画像を作る．
