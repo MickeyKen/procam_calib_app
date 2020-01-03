@@ -8,5 +8,5 @@
 
 ###### 2. チェスボードとプロジェクタで投影したサークルグリッドを一枚の画像に保存する．
 <div align="center">
-<img src="https://github.com/MickeyKen/procam_calib_app/blob/master/camera_imagedata_2.jpeg" width="70px" />
+<img src="https://github.com/MickeyKen/procam_calib_app/blob/master/camera_imagedata_2.jpeg" width="200px" />
 </div>
