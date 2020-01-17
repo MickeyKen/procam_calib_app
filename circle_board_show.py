@@ -8,7 +8,7 @@ img = cv2.imread('board/circleboard10x5.png',cv2.IMREAD_COLOR)
 
 cv2.namedWindow('screen', cv2.WINDOW_NORMAL)
 cv2.setWindowProperty('screen', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-cv2.imshow('screen',cv2.bitwise_not(img))
+cv2.imshow('screen',img)
 
 
 k = cv2.waitKey(0)
