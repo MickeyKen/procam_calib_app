@@ -100,6 +100,8 @@ def make_gray_for_circle(img):
 ### main function ###
 #####################
 
+calib_num = 0
+
 cap = cv.VideoCapture(0)
 
 while True:
@@ -114,10 +116,13 @@ while True:
 
   ### Find the chess and circle board corners  ###
   ret, corners = cv.findChessboardCorners(gray, (6,4), None)
+  # if ret == True:
+  #     print corners[0][0][1]
+  #     print corners[23][0][1]
   # ret2, circles = cv.findCirclesGrid(gray_for_circle, (10,5), flags = cv.CALIB_CB_SYMMETRIC_GRID)
 
 
-  if ret == True :
+  if ret == True and calib_num < 5:
       img2 = make_gray_for_circle(img)
       gray_for_circle = cv.cvtColor(img2, cv.COLOR_BGR2GRAY)
       ret2, circles = cv.findCirclesGrid(gray_for_circle, (10,5), flags = cv.CALIB_CB_SYMMETRIC_GRID)
@@ -177,15 +182,13 @@ while True:
           circles_circle = get_circle_grid()
           objectPoints.append(proj_pW)
           projCirclePoints.append(circles_circle)
+          calib_num += 1
 
-  cv.imshow('screen',img)
-  if cv.waitKey(1) & 0xFF == ord('q'):
-        break
+  if calib_num == 5:
+    # print (objectPoints)
+    # print (projCirclePoints)
 
-# print (objectPoints)
-# print (projCirclePoints)
-
-ret, K_proj, dist_coef_proj, rvecs, tvecs = cv.calibrateCamera(objectPoints,
+    ret, K_proj, dist_coef_proj, rvecs, tvecs = cv.calibrateCamera(objectPoints,
                                                                 projCirclePoints,
                                                                (proj_width, proj_height),
                                                                None,
@@ -193,6 +196,22 @@ ret, K_proj, dist_coef_proj, rvecs, tvecs = cv.calibrateCamera(objectPoints,
                                                                None,
                                                                None)
                                                     # flags = cv.CALIB_USE_INTRINSIC_GUESS
-print("proj calib mat after\n%s"%K_proj)
-print("proj dist_coef %s"%dist_coef_proj.T)
-print("calibration reproj err %s"%ret)
+    print("proj calib mat after\n%s"%K_proj)
+    print("proj dist_coef %s"%dist_coef_proj.T)
+    print("calibration reproj err %s"%ret)
+    calib_num += 1
+
+  if ret == True and calib_num > 5:
+      print ("kokoni shori wo kaku")
+      XYZc = np.zeros((4, 3))
+      UVc = np.zeros((4, 3))
+      UVp =　np.zeros((4, 3))
+
+      for i in range(4):
+          XYZc[0][0] =  
+
+
+
+  cv.imshow('screen',img)
+  if cv.waitKey(1) & 0xFF == ord('q'):
+        break
