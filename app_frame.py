@@ -65,8 +65,10 @@ class Test(QMainWindow):
 
 
     def load_img(self, file_name, binary_flag, save_flag, calib_flag):
-        self.img = cv2.imread("data/" + file_name + ".jpeg")
+        # print ("data/" , file_name , ".jpg")
+        self.img = cv2.imread("data/" + file_name + ".jpg", cv2.IMREAD_COLOR)
         img = np.copy(self.img)
+        # img = np.float32(img)
 
         if binary_flag == 1:
             orgHeight, orgWidth = img.shape[:2]
@@ -81,12 +83,12 @@ class Test(QMainWindow):
                   img[i][j][2] = 0
 
         if save_flag == 1:
-            cv2.imwrite("data2/" + file_name + ".jpeg", img)
+            cv2.imwrite("data2/" + file_name + ".jpg", img)
 
         if calib_flag == 1:
-            ret2, circles = cv2.findCirclesGrid(img, (10,7), flags = cv2.CALIB_CB_SYMMETRIC_GRID)
+            ret2, circles = cv2.findCirclesGrid(img, (10,5), flags = cv2.CALIB_CB_SYMMETRIC_GRID)
             if ret2 == True:
-                cv2.drawChessboardCorners(img, (10, 7), circles, ret2)
+                cv2.drawChessboardCorners(img, (10, 5), circles, ret2)
 
         show_img = cv2.resize(img,(480,270))
         self.drawing(show_img)

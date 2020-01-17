@@ -34,7 +34,7 @@ def main():
     cw = 1080
     chessboard = cv2.resize(chessboard,(ch,cw))
 
-    cv2.imwrite("circleboard{}x{}.png".format(w, h), chessboard)
+    cv2.imwrite("circleboard{}x{}.png".format(w, h), cv2.bitwise_not(chessboard))
     cv2.imshow("circleboard", chessboard)
     cv2.waitKey(0)
     cv2.destroyAllWindows()

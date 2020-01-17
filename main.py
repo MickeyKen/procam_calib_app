@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 def get_args():
     parser = argparse.ArgumentParser(description="This script creates a circleboard image for calibration")
     parser.add_argument("--width", type=int, default=10)
-    parser.add_argument("--height", type=int, default=7)
+    parser.add_argument("--height", type=int, default=5)
     parser.add_argument("--margin_size", type=int, default=12)
     parser.add_argument("--block_size", type=int, default=100)
-    parser.add_argument("--radius", type=int, default=30)
+    parser.add_argument("--radius", type=int, default=20)
     args = parser.parse_args()
     return args
 args = get_args()
@@ -22,19 +22,17 @@ proj_width = 1920
 proj_height = 1080
 
 ### chessboard parameter ###
-row = 9
-col = 7
+row = 6
+col = 4
 corner_num = (row, col)
-size = 2.5
+size = 3
 
 ### camera parameter ###
-K = np.array([[ 1.0464088296606685e+03, 0., 9.6962285013582118e+02],
-              [0. , 1.0473601981442353e+03, 5.3418043955010319e+02],
+K = np.array([[ 645.589630, 0.000000, 314.209123],
+              [0.000000, 645.026103, 240.116436],
               [0., 0., 1. ]],np.float32)
 
-d = np.array([[ 4.3977277514639868e-02, -6.2933078892199332e-02,
-       -5.7377837329916246e-04, 7.8218303056817190e-04,
-       1.4687866930870116e-02 ]],np.float32)
+d = np.array([[ 0.038109, -0.135050, -0.002238, -0.000964, 0.000000]],np.float32)
 
 ### termination criteria ###
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -74,7 +72,8 @@ def chessboard_pW():
 ### get circle 1920*1080 for projector ###
 #########################################
 def get_circle_grid():
-    chessboard = cv.imread('board/circleboard10x7.png',1)
+    chessboard = cv.imread('board/circleboard10x5.png',1)
+    chessboard = cv.bitwise_not(chessboard)
 
     ret_circle, circles_circle = cv.findCirclesGrid(chessboard, (args.width,args.height), flags = cv.CALIB_CB_SYMMETRIC_GRID)
 
@@ -86,8 +85,9 @@ def get_circle_grid():
 #####################
 ### main function ###
 #####################
+
 img_num = 1
-images = glob.glob('data/*.jpeg')
+images = glob.glob('data/*.jpg')
 
 for fname in images:
 
@@ -105,14 +105,17 @@ for fname in images:
 
 
   ### Find the chess and circle board corners  ###
-  ret, corners = cv.findChessboardCorners(gray, (9,7), None)
-  ret2, circles = cv.findCirclesGrid(gray_for_circle, (10,7), flags = cv.CALIB_CB_SYMMETRIC_GRID)
+  ret, corners = cv.findChessboardCorners(gray, (6,4), None)
+  ret2, circles = cv.findCirclesGrid(gray_for_circle, (10,5), flags = cv.CALIB_CB_SYMMETRIC_GRID)
+  if ret ==True:
+    #print ("su")
 
 
   if ret == True and ret2 == True:
+      #print ("success")
       ### main calibration ###
       corners2 = cv.cornerSubPix(gray, corners, (9,9), (-1,-1), criteria)
-      cv.drawChessboardCorners(img, (9,7), corners2, ret)
+      cv.drawChessboardCorners(img, (6,4), corners2, ret)
 
       pW = chessboard_pW()
 
