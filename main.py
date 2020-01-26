@@ -28,11 +28,11 @@ corner_num = (row, col)
 size = 3
 
 ### camera parameter ###
-K = np.array([[ 645.589630, 0.000000, 314.209123],
-              [0.000000, 645.026103, 240.116436],
+K = np.array([[ 1.71043410e+03, 0.000000, 1.07773094e+03],
+              [0.000000, 1.69437227e+03, 3.52642480e+02],
               [0., 0., 1. ]],np.float32)
 
-d = np.array([[ 0.038109, -0.135050, -0.002238, -0.000964, 0.000000]],np.float32)
+d = np.array([[ 0.06935322, -0.12890731, -0.01425927, 0.0161514, 0.05991636]],np.float32)
 
 ### termination criteria ###
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -107,9 +107,6 @@ for fname in images:
   ### Find the chess and circle board corners  ###
   ret, corners = cv.findChessboardCorners(gray, (6,4), None)
   ret2, circles = cv.findCirclesGrid(gray_for_circle, (10,5), flags = cv.CALIB_CB_SYMMETRIC_GRID)
-  if ret ==True:
-    #print ("su")
-
 
   if ret == True and ret2 == True:
       #print ("success")
